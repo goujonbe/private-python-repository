@@ -13,7 +13,8 @@ async fn main() {
     let dummy = r#"<!DOCTYPE HTML>
     <HTML>
       <body>
-        <a href="../packages/dummy-0.1.tar.gz">dummy</a>
+        <a href="../packages/dummy-0.1.tar.gz">dummy-0.1</a>
+        <a href="../packages/dummy-0.2.tar.gz">dummy-0.2</a>
       </body>
     </html>"#;
 
@@ -29,10 +30,13 @@ async fn main() {
             warp::reply::html(dummy)
         });
 
-    let dummy_tar_gz = warp::path!("simple" / "packages" / "dummy-0.1.tar.gz")
+    let dummy_tar_gz_01 = warp::path!("simple" / "packages" / "dummy-0.1.tar.gz")
         .and(warp::fs::file("packages/dummy-0.1.tar.gz"));
 
-    let routes = simple.or(dummy).or(dummy_tar_gz);
+    let dummy_tar_gz_02 = warp::path!("simple" / "packages" / "dummy-0.2.tar.gz")
+        .and(warp::fs::file("packages/dummy-0.2.tar.gz"));
+
+    let routes = simple.or(dummy).or(dummy_tar_gz_01).or(dummy_tar_gz_02);
 
     warp::serve(routes)
     .run(([127, 0, 0, 1], 3030))
