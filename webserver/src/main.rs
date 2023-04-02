@@ -1,34 +1,29 @@
-use warp::Filter;
+use warp::{Filter, Rejection};
+
+mod handler;
+
+type WebResult<T> = std::result::Result<T, Rejection>;
+
+pub struct Project {
+    pub name: String,
+    pub url: String,
+}
+
+pub struct PackageVersion {
+    pub name: String,
+    pub download_url: String,
+    pub package_name: String,
+}
 
 #[tokio::main]
 async fn main() {
-
-    let body = r#"<!DOCTYPE HTML>
-    <HTML>
-      <body>
-        <a href="/dummy/">dummy</a>
-      </body>
-    </html>"#;
-
-    let dummy = r#"<!DOCTYPE HTML>
-    <HTML>
-      <body>
-        <a href="../packages/dummy-0.1.tar.gz">dummy-0.1</a>
-        <a href="../packages/dummy-0.2.tar.gz">dummy-0.2</a>
-      </body>
-    </html>"#;
-
     let simple = warp::path!("simple")
         .and(warp::get())
-        .map(move || {
-            warp::reply::html(body)
-        });
-    
+        .and_then(handler::project_list_handler);
+
     let dummy = warp::path!("simple" / "dummy")
         .and(warp::get())
-        .map(move || {
-            warp::reply::html(dummy)
-        });
+        .and_then(handler::version_list_handler);
 
     let dummy_tar_gz_01 = warp::path!("simple" / "packages" / "dummy-0.1.tar.gz")
         .and(warp::fs::file("packages/dummy-0.1.tar.gz"));
@@ -38,7 +33,5 @@ async fn main() {
 
     let routes = simple.or(dummy).or(dummy_tar_gz_01).or(dummy_tar_gz_02);
 
-    warp::serve(routes)
-    .run(([127, 0, 0, 1], 3030))
-    .await;
+    warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }

@@ -1,0 +1,8 @@
+<!DOCTYPE HTML>
+<HTML>
+<body>
+    {% for version in versions %}
+        <a href="{{ version.download_url }}">{{ version.package_name }}-{{ version.name }}</a>
+    {% endfor %} 
+</body>
+</html>
